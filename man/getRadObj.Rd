@@ -2,7 +2,7 @@
 % Please edit documentation in R/Radviz.R
 \name{getRadObj}
 \alias{getRadObj}
-\title{title}
+\title{Generate Radviz object for visualization}
 \usage{
 getRadObj(
   input_frm,
@@ -39,5 +39,5 @@ getRadObj(
 getRadviz object
 }
 \description{
-title
+Generate Radviz object for visualization
 }

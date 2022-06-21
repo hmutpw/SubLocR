@@ -2,7 +2,7 @@
 % Please edit documentation in R/Radviz.R
 \name{do_RadvizEnrichPlot}
 \alias{do_RadvizEnrichPlot}
-\title{Perform visualization}
+\title{Radviz visualization}
 \usage{
 do_RadvizEnrichPlot(
   rv,
@@ -37,5 +37,5 @@ do_RadvizEnrichPlot(
 a ggplot object
 }
 \description{
-Perform visualization
+Radviz visualization
 }

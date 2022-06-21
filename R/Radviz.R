@@ -1,10 +1,5 @@
 
-
-
-#############
-# get Radviz object
-#############
-#' title
+#' Generate Radviz object for visualization
 #'
 #' @param input_frm A data.frame used to generate the Radviz object. The columns were items around the circle.
 #' @param anchors Dimensions used to generate the map. Default: all the columns from the \code{input_frm}.
@@ -84,7 +79,7 @@ addRadvizCircle <- function(rv, color="black"){
 #############
 # do Radviz plot
 #############
-#' Perform visualization
+#' Radviz visualization
 #' @param rv A \code{\link{getRadviz}} object generate from \code{\link{do.radviz}}.
 #' @param color_by Groups used to label the color.
 #' @param outline_circle Whether to add circle in figure?
