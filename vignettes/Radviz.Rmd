@@ -1,0 +1,80 @@
+---
+title: "Radviz"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Radviz}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(SubLocR)
+```
+
+
+#### 1. loading dataset
+
+```{r}
+gene_type <- read.table("D:/YJ/YJ-RSL/ref_genome/geneTypeEnsembl84.txt",header=T,row.names=1)
+
+gene_tpm <- read.table("D:/YJ/YJ-RSL/expression_data/merged_exp/exon_level_median_TPM.tab",sep="\t",header=T)
+gene_tpm_filter <- gene_tpm[apply(gene_tpm[,-c(1:3)],1,function(x){sum(x)>1}),]
+row.names(gene_tpm_filter) <- gene_tpm_filter$gene_id
+gene_tpm_filter$gene_type <- gene_type[gene_tpm_filter$gene_type,"known_type"]
+locs <- c("INPUT","CE","ME","SNE","CBNE",'PE')
+gene_tpm_WT <- gene_tpm_filter[,grep("^WT",colnames(gene_tpm_filter))]
+colnames(gene_tpm_WT) <- locs
+row.names(gene_tpm_WT) <- gene_tpm_filter$gene_id
+gene_tpm_WT_divergence <- apply(gene_tpm_WT[,-1],1,function(x){.H((x/sum(x)))})
+gene_tpm_WT_tab <- data.frame(gene_tpm_filter[,1:3], divergence=gene_tpm_WT_divergence[row.names(gene_tpm_filter)], gene_tpm_WT)
+
+
+gene_tpm_D2 <- gene_tpm_filter[,grep("^D2",colnames(gene_tpm_filter))]
+colnames(gene_tpm_D2) <- locs
+row.names(gene_tpm_D2) <- gene_tpm_filter$gene_id
+gene_tpm_D2_divergence <- apply(gene_tpm_D2[,-1],1,function(x){.H((x/sum(x)))})
+gene_tpm_D2_tab <- data.frame(gene_tpm_filter[,1:3], divergence=gene_tpm_D2_divergence[row.names(gene_tpm_filter)], gene_tpm_D2)
+
+gene_tpm_D4 <- gene_tpm_filter[,grep("^D4",colnames(gene_tpm_filter))]
+colnames(gene_tpm_D4) <- locs
+row.names(gene_tpm_D4) <- gene_tpm_filter$gene_id
+gene_tpm_D4_divergence <- apply(gene_tpm_D4[,-1],1,function(x){.H((x/sum(x)))})
+gene_tpm_D4_tab <- data.frame(gene_tpm_filter[,1:3], divergence=gene_tpm_D4_divergence[row.names(gene_tpm_filter)], gene_tpm_D4)
+
+gene_tpm_list <- list(D0=gene_tpm_WT_tab, D3=gene_tpm_D2_tab, D5=gene_tpm_D4_tab)
+ESC_RSL_data <- gene_tpm_list
+usethis::use_data(ESC_RSL_data)
+
+gene_infor <- gene_tpm_filter[,1:3]
+gene_names <- c("TSPAN6", "SCYL3")
+
+library(dplyr)
+get_frm <- gene_infor %>% filter(gene_name %in% gene_names)
+get_exp <- lapply(gene_tpm_list,function(x,gene_id){
+  x[gene_id,]
+},gene_id = get_frm$gene_id)
+
+rv_list <- lapply(get_exp, FUN = getRadObj, anchors=c("CE","ME","SNE","CBNE",'PE'),optim_anchor =FALSE, text_size = 4, norm_data =FALSE)
+
+p_list <- lapply(rv_list, do_RadvizEnrichPlot, color_by="divergence",  point_size=5)
+
+ct.S <- make.S(locs[-1])
+ct.sim <- cosine(as.matrix(rv_list$D0$proj$data[,locs[-1]]))
+in.da(ct.S,ct.sim)
+rv.da(ct.S,ct.sim)
+optim.ct <- do.optimRadviz(ct.S,ct.sim,iter=100,n=1000)
+ct.S <- make.S(get.optim(optim.ct))
+ct.S <- recenter(ct.S,'CE')
+trans <- function(coln) do.L(coln,fun=function(x) quantile(x,c(0.005,0.995)))
+
+ct.rv <- do.radviz(data_list$D3[,anchors],ct.S,trans=trans)
+p_list$D0
+```
+

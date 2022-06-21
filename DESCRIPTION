@@ -1,0 +1,21 @@
+Package: SubLocR
+Type: Package
+Title: Subcellular localization visualization
+Version: 0.1.0
+Author: Puwen Tan
+Maintainer: Puwen Tan (bioinfo_wen@163.com)
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: GPL
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 7.1.1
+Depends: 
+    R (>= 2.10)
+    ggplot2
+    Radviz
+    ggpubr
