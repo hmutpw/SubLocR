@@ -14,7 +14,7 @@
 #' @return getRadviz object
 #'
 #' @export
-#' @importFrom Radviz do.L make.S cosine do.optimRadviz get.optim recenter do.radviz
+#' @importFrom Radviz do.L make.S cosine do.optimRadviz get.optim recenter
 
 getRadObj <- function(input_frm,
                       anchors = colnames(input_frm),
@@ -30,7 +30,7 @@ getRadObj <- function(input_frm,
     not_in <- setdiff(anchors, colnames(input_frm))
     stop("Anchors [",paste(not_in, collapse = ","),"] not found from columns of input_frm!")
   }
-  exp_mat <- as.matrix(input_frm[,anchors])
+  exp_mat <- as.matrix(input_frm[, anchors, drop=FALSE])
   if(!is.numeric(exp_mat)){
     stop("The 'anchors' columns in 'input_frm' must be numeric!")
   }
@@ -58,7 +58,7 @@ getRadObj <- function(input_frm,
       mat.S <- Radviz::recenter(mat.S, newc = recenter)
     }
   }
-  rv <- Radviz::do.radviz(x = input_frm,
+  rv <- do.radviz2(x = input_frm,
                           springs = mat.S,
                           trans = trans,
                           label.color = text_color,
@@ -75,6 +75,66 @@ addRadvizCircle <- function(rv, color="black"){
   rv$proj <- rv$proj+circle
   rv
 }
+
+#############
+# modified do.radviz
+#############
+do.radviz2 <- function (x,
+                        springs,
+                        trans = do.L,
+                        label.color = "orangered4",
+                        label.size = NA,
+                        type = NULL,
+                        graph = NULL){
+  if (!all(rownames(springs) %in% colnames(x))) {
+    stop("The following springs are missing in the input:\n",
+         paste(setdiff(rownames(springs), colnames(x)), sep = "",
+               collapse = ", "))
+  }
+  if (!is.data.frame(x)) {
+    x <- as.data.frame(x)
+  }
+  mat <- as.matrix(x[, rownames(springs), drop=FALSE])
+  if (!is.null(trans) && nrow(mat)>1) {
+    mat <- apply(mat, 2, trans)
+  }
+  weights <- mat/matrix(rep(rowSums(mat), each = ncol(mat)),
+                        nrow = nrow(mat), byrow = T)
+  rx <- colSums(t(weights) * springs[, 1])
+  ry <- colSums(t(weights) * springs[, 2])
+  rvd <- apply(cbind(rx, ry), 1, function(x) any(is.na(x)))
+  if (any(rvd)) {
+    warning("at least 1 point could not be projected; check the `valid` slot for details")
+  }
+  x[, "rx"] <- rx
+  x[, "ry"] <- ry
+  x[, "rvalid"] <- rvd
+  if (is.null(type)) {
+    springLengths <- diag(springs %*% t(springs))
+    if (any(springLengths < 0.99)) {
+      type <- "Freeviz"
+    }
+    else type <- "Radviz"
+  }
+  lims <- range(springs) * 1.1
+  radviz <- list(proj = ggplot(data = x, aes_string(x = "rx", y = "ry"))+
+                   geom_text(data = data.frame(springs,
+                                               Channel = factor(rownames(springs),levels = rownames(springs))),
+                             aes_string(x = "X1", y = "X2",label = "Channel"),
+                             color = label.color, size = label.size)+
+                   coord_equal() + xlim(lims) + ylim(lims) + theme_radviz(),
+                 type = type, trans = trans)
+  if (!is.null(graph)) {
+    radviz$graphEdges <- igraph::as_data_frame(graph)
+    radviz$type <- "Graphviz"
+  }
+  class(radviz) <- "radviz"
+  return(radviz)
+}
+
+
+
+
 
 #############
 # do Radviz plot

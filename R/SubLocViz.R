@@ -5,20 +5,20 @@
 # subcellular localization visualization
 #############
 
-#' Sub-cellular visualization
+#' Subcellular visualization
 #'
-#' @param gene_name Gene symbols used for visualization
+#' @param gene_name Gene symbols used for visualization. At least two genes
 #' @param stage Stages used for visualization
 #' @param use_data use normalized data?
 #' @param plot_type type of plot?
 #' @param color_by which column used for visualization?
 #' @param show_gene_name Whether to show gene names?
-#' @param label_size The gene names size in figure
-#' @param point_size The point size
-#' @param point_shape The point shape
-#' @param continuous_colors The color of points
-#' @param text_size_circle the text color of outlier
-#' @param text_color_circle the color of outlier
+#' @param label_size The gene names size in figure.
+#' @param point_size The point size.
+#' @param point_shape The point shape.
+#' @param continuous_colors The color of points.
+#' @param text_size_circle the text color of outlier.
+#' @param text_color_circle the color of outlier.
 #' @param ... other parameters.
 #'
 #' @return a ggplot2 object
@@ -28,6 +28,8 @@
 #' @export
 #'
 #' @examples
+#' subLocViz(gene_name=c("RUNX1","MYC"))
+#'
 subLocViz <- function(gene_name,
                       stage = c("D0","D3","D5"),
                       use_data = c("scaled","ratio","raw"),
@@ -53,13 +55,13 @@ subLocViz <- function(gene_name,
   }, gene = gene_name)
   if(use_data == "ratio"){
     data_list <- lapply(X = data_list, FUN = function(x, anchor){
-      ratio <- t(apply(x[,anchors,drop=FALSE],1,function(x){x/sum(x)}))
+      ratio <- t(apply(x[,anchors, drop=FALSE],1,function(x){x/sum(x)}))
       x[,anchors] <- ratio
       x
     },anchor = anchors)
   }else if(use_data == "scaled"){
     data_list <- lapply(X = data_list, FUN = function(x, anchor){
-      scaled <- t(apply(x[,anchors,drop=FALSE],1,function(x){(x-min(x))/(max(x)-min(x))}))
+      scaled <- t(apply(x[,anchors, drop=FALSE],1,function(x){(x-min(x))/(max(x)-min(x))}))
       x[,anchors] <- scaled
       x
     },anchor = anchors)
