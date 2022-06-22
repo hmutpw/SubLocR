@@ -93,7 +93,7 @@ subLocViz <- function(gene_name,
   #---add title
   titles <- names(Radviz_list)
   Radviz_list <- purrr::map2(.x = Radviz_list, .y = titles, .f = function(x,y){
-    x+ggtitle(label = y)+theme(plot.title = element_text(hjust = 0.5,size = 12))
+    x+ggtitle(label = y)+theme(plot.title = element_text(hjust = 0.5, size = 16))
   })
   ggpubr::ggarrange(plotlist = Radviz_list, nrow = 1)
 }
